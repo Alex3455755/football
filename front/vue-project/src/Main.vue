@@ -30,28 +30,6 @@ export default {
       } catch (error) {
         console.error('Error fetching players:', error);
         this.error = error.message;
-        
-        // Запасной вариант: используем начальные данные если запрос не удался
-        this.players = [
-          {
-            id: 1,
-            name: 'Alex',
-            number: 10,
-            rate: 88,
-          },
-          {
-            id: 2,
-            name: 'Messi',
-            number: 20,
-            rate: 99,
-          },
-          {
-            id: 3,
-            name: 'Ronaldo',
-            number: 7,
-            rate: 95
-          }
-        ];
       } finally {
         this.loading = false;
       }
