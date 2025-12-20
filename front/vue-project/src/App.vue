@@ -4,9 +4,10 @@
     <!-- Навигация (опционально) -->
     <nav>
       <router-link to="/">Home</router-link>
+      <router-link to="/selectTeam">SelectTeam</router-link>
     </nav>
+
     
-    <!-- Это ОБЯЗАТЕЛЬНО - здесь будут отображаться компоненты маршрутов -->
     <router-view></router-view>
   </div>
 </template>

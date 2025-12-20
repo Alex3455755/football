@@ -8,7 +8,7 @@ export default {
   },
   data() {
     return {
-      players: [], // Начально пустой массив
+      players: [],
       loading: false,
       error: null
     }
@@ -22,7 +22,7 @@ export default {
       this.error = null;
       
       try {
-        const response = await fetch('http://localhost/football/back/players.php');
+        const response = await fetch('http://localhost/football/back/playersController.php/?method=getPlayers');
         
         const data = await response.json();
         this.players = data;

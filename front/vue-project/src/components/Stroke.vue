@@ -3,8 +3,6 @@ export default {
 
   props: ["name","number","rate"],
    mounted() {
-    // Проверьте, приходят ли props
-    console.log('Employee mounted with:', this.name, this.number, this.rate)
   },
   data() {
     return {
