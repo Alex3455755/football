@@ -23,11 +23,15 @@ export default {
 }
 </script>
 <template>
-  <a class="line" :style="cssVars" href="{{ '/Team' + id }}">
+  <router-link 
+    class="line" 
+    :style="cssVars" 
+    :to="`/Team/${id}`"
+  >
       <span>{{ name }}</span>
       <span>|</span>
       <span>{{ common_rate }}</span>
-  </a>
+  </router-link>
 </template>
 
 <style>

@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import Main from './Main.vue'
 import SelectTeam from './SelectTeam.vue'
+import Team from './Team.vue'
 const router = createRouter({
   routes: [{
     path: '/',
@@ -11,6 +12,11 @@ const router = createRouter({
   {
     path: '/selectTeam',
     component: SelectTeam
+  },{
+    path: '/team/:id',
+      name: 'Team',
+      component: Team,
+      props: true
   }
 ],
   history: createWebHistory()

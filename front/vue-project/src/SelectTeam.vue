@@ -71,7 +71,6 @@ body {
   font-family: Arial, Helvetica, sans-serif
 }
 
-/* Адаптивные колонки */
 @media (max-width: 768px) {
   .TeamsList {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

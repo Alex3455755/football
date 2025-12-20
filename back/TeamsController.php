@@ -50,6 +50,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 $conn->close();
                 
                 echo json_encode($players, JSON_PRETTY_PRINT);
+        }if ($_GET['method'] === 'getOneTeam'){
+            $id = $_GET['id'];
+            $conn = new mysqli($host, $username, $password, $dbname);
+        
+                if ($conn->connect_error) {
+                    throw new Exception("Connection failed: " . $conn->connect_error);
+                }
+                
+                $sql = "SELECT * FROM teams WHERE id = " . $id;
+                $result = $conn->query($sql);
+                
+                if ($result === false) {
+                    throw new Exception("Query failed: " . $conn->error);
+                }
+                
+                $players = [];
+                
+                if ($result->num_rows > 0) {
+                    while($row = $result->fetch_assoc()) {
+                        $players[] = [
+                            'id' => (int)$row['id'],
+                            'name' => $row['name'] ?? '',
+                            'color' => ($row['color'] ?? 0),
+                            'common_rate' => (float)($row['common_rate'] ?? 0),
+                        ];
+                    }
+                }
+                
+                $conn->close();
+                
+                echo json_encode($players, JSON_PRETTY_PRINT);
         }
         
     } catch (Exception $e) {
