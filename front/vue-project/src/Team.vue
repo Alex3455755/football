@@ -1,6 +1,6 @@
 <script>
 import Stroke from './components/Stroke.vue';
-
+import MainTeamBlock from './components/MainTeamBlock.vue';
 
 export default {
     name: 'Team',
@@ -10,7 +10,8 @@ export default {
       required: true
     }
 },components: {
-    Stroke
+    Stroke,
+    MainTeamBlock,
   },
   mounted() {
     this.fetchTeam();
@@ -21,10 +22,15 @@ export default {
       this.error = null;
       
       try {
-        const response = await fetch(`http://localhost/football/back/TeamsController.php/?method=getOneTeam&&id=${this.id}`);
+        const response = await fetch(`http://localhost/football/back/TeamsController.php/?method=getTeams`);
         
         const data = await response.json();
-        this.team = data[0];
+        data.forEach(elem => {
+          if(elem.id == this.id){
+            this.team = elem;
+          }
+        });
+        this.teamsList = data;
         
       } catch (error) {
         console.error('Error fetching teams:', error);
@@ -42,7 +48,6 @@ export default {
         
         const data = await response.json();
         this.players = data;
-        console.log(data);
         
       } catch (error) {
         console.error('Error fetching teams:', error);
@@ -66,6 +71,7 @@ export default {
         team: {
             id: 0,color: '',name: '',common_rate: 0
         },
+        teamsList: [],
          cssVars: {
         '--team-color': '#CCCCCC' // значение по умолчанию
       }
@@ -80,13 +86,8 @@ export default {
         <p>{{ team.common_rate }}</p>
     </header>
     <main>
-        <Stroke 
-      v-for="emp in players"
-      :key="emp.id"
-      :name="emp.name"
-      :number="emp.number"
-      :rate="emp.rate"
-    />
+    <MainTeamBlock :id = "id" :squad = "players"
+    :team = "team" :teamList ="teamsList" />
     </main>
 </template>
 
