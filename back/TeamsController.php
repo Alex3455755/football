@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                             'name' => $row['name'] ?? '',
                             'color' => ($row['color'] ?? 0),
                             'common_rate' => (float)($row['common_rate'] ?? 0),
+                            'count_points'=> (int)$row['count_points'],
                         ];
                     }
                 }

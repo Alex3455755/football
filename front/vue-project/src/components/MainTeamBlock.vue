@@ -1,51 +1,66 @@
 <script>
-
-
+    import Table from './TeamsMain/Table.vue';
+    import Squad from './TeamsMain/Squad.vue';
 export default {
     name: 'MainTeamBlock',
-  props: {
-    id: 0,
-    squad: {
+    components: {
+        Table,
+        Squad,
+  },
+    props: {
+        id: Number,
+        squad: {
             type: Array,
             default: () => []
         },
         team: {
             type: Object,
-            default: () => ({}),
-        teamList: {
-            type: Array,
+            default: () => ({})
+        },
+        teamsList: {
+            type: Array, 
             default: () => []
         },
-},
-  data() {
-    return {
-        teamList: [],
-        squad: [],
-        team: {
-            id: 0,color: '',name: '',common_rate: 0
-        },
-         cssVars: {
-        '--team-color': '#CCCCCC'
-      }
+        color: '',
+    },methods: {
+  changeComponent(e) {
+    if (e.target.textContent === 'Главная') {
+      this.currentComponent = 'Table';
+    }if(e.target.textContent === 'Состав'){
+        this.currentComponent = 'Squad';
     }
-  },
+  }
 }
-}
+,
+    data() {
+        return {
+            cssVars: {
+                '--team-color': '#CCCCCC'
+            },
+            currentComponent: 'Table'
+        }
+    }
+} 
 </script>
+
 
 <template>
     <div class="display">
         <aside>
             <nav class="navigation">
-                <button>Главная</button>
-                <button>Состав</button>
-                <button id="nextGame">Следующий Матч</button>
+                <button @click="changeComponent($event)">Главная</button>
+                <button @click="changeComponent($event)">Состав</button>
+                <button @click="changeComponent($event)" id="nextGame">Следующий Матч</button>
             </nav>
         </aside>
         <article>
-                    <p>{{ id }}</p>
-        <p>{{ team }}</p>
-        <p>{{ squad }}</p>
+            <component
+            :is="currentComponent"
+            :teamsList="teamsList"
+            :squad="squad"
+            :color="color"
+            />
+
         </article>
     </div>
 </template>
@@ -54,7 +69,6 @@ export default {
 <style>
     .display{
         display: flex;
-        height: 80vh;
         background-color: darkgrey;
     }
     .navigation{
@@ -65,7 +79,7 @@ export default {
         justify-content: space-around;
         background-color: rgb(63, 59, 59);
         align-items: center;
-        height: 200px;
+        height: 300px;
     }
     .navigation > button{
         background-color: lightgrey;

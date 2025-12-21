@@ -87,7 +87,7 @@ export default {
     </header>
     <main>
     <MainTeamBlock :id = "id" :squad = "players"
-    :team = "team" :teamList ="teamsList" />
+    :team = "team" :teamsList ="teamsList" :color="team.color"/>
     </main>
 </template>
 
