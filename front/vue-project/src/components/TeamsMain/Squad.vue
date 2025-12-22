@@ -9,82 +9,126 @@ export default {
     color: {
       type: String,
       default: '#ffffff'
+    },
+    callbackStartSquad: {
+      type: Function,
+      default: null
+    },
+    startingXI: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
     return {
-      bench: [],          // игроки вне поля
-      startingXI: [],     // игроки на поле (максимум 5)
+      bench: [],
+      startingXILocal: [],
       draggingPlayer: null
     }
   },
   computed: {
-    // сортируем таблицу по номеру
     sortedBench() {
-      return [...this.bench].sort((a, b) => a.number - b.number)
+      return [...this.bench].sort((a, b) => a.number - b.number);
     },
-    // средний рейтинг игроков на поле
     averageFieldRate() {
-      if (this.startingXI.length === 0) return 0
-      const sum = this.startingXI.reduce((acc, p) => acc + (p.rate || 0), 0)
-      return (sum / this.startingXI.length).toFixed(1)
+      if (this.startingXILocal.length === 0) return 0;
+      const sum = this.startingXILocal.reduce((acc, p) => acc + (p.rate || 0), 0);
+      return (sum / this.startingXILocal.length).toFixed(1);
     },
-    // контрастный цвет для номера на футболке
     shirtTextColor() {
-      const hex = this.color.replace('#', '')
-      const r = parseInt(hex.substr(0, 2), 16)
-      const g = parseInt(hex.substr(2, 2), 16)
-      const b = parseInt(hex.substr(4, 2), 16)
-      const brightness = (r * 299 + g * 587 + b * 114) / 1000
-      return brightness > 128 ? '#000000' : '#FFFFFF'
+      const hex = this.color.replace('#', '');
+      const r = parseInt(hex.substr(0, 2), 16);
+      const g = parseInt(hex.substr(2, 2), 16);
+      const b = parseInt(hex.substr(4, 2), 16);
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness > 128 ? '#000000' : '#FFFFFF';
     }
   },
   created() {
-    // изначально все игроки приходят в составе и считаются "на скамейке"
-    this.bench = [...this.squad]
+    // локальная копия стартового состава
+    this.startingXILocal = [...this.startingXI];
+    // bench = все игроки минус те, кто уже в старте
+    this.bench = [...this.squad];
+    this.checkBench();
+  },
+  watch: {
+    // если родитель поменял стартовый состав —
+    // синхронизируем локальное состояние
+    startingXI: {
+      deep: true,
+      handler(newVal) {
+        this.startingXILocal = [...newVal];
+        this.bench = [...this.squad];
+        this.checkBench();
+      }
+    },
+    // если пришёл новый список игроков (другая команда)
+    squad: {
+      deep: true,
+      handler(newSquad) {
+        this.bench = [...newSquad];
+        this.checkBench();
+      }
+    }
   },
   methods: {
     onDragStart(player) {
-      this.draggingPlayer = player
+      this.draggingPlayer = player;
     },
     allowDrop(event) {
-      event.preventDefault()
+      event.preventDefault();
     },
-    // дроп в основное поле
     onDropToStarting(event) {
-      event.preventDefault()
-      if (!this.draggingPlayer) return
+      event.preventDefault();
+      if (!this.draggingPlayer) return;
 
-      // ограничение максимум 5 игроков
-      if (this.startingXI.length >= 5) {
-        alert('В основе может быть максимум 5 игроков')
-        this.draggingPlayer = null
-        return
+      if (this.startingXILocal.length >= 5) {
+        alert('В основе может быть максимум 5 игроков');
+        this.draggingPlayer = null;
+        return;
       }
 
-      // не добавляем дубликаты
-      if (this.startingXI.find(p => p.id === this.draggingPlayer.id)) {
-        this.draggingPlayer = null
-        return
+      if (this.startingXILocal.find(p => p.id === this.draggingPlayer.id)) {
+        this.draggingPlayer = null;
+        return;
       }
 
-      this.bench = this.bench.filter(p => p.id !== this.draggingPlayer.id)
-      this.startingXI.push(this.draggingPlayer)
-      this.draggingPlayer = null
+      this.bench = this.bench.filter(p => p.id !== this.draggingPlayer.id);
+      this.startingXILocal.push(this.draggingPlayer);
+      this.draggingPlayer = null;
     },
-    // дроп обратно на скамейку
     onDropToBench(event) {
-      event.preventDefault()
-      if (!this.draggingPlayer) return
+      event.preventDefault();
+      if (!this.draggingPlayer) return;
 
       if (this.bench.find(p => p.id === this.draggingPlayer.id)) {
-        this.draggingPlayer = null
-        return
+        this.draggingPlayer = null;
+        return;
       }
 
-      this.startingXI = this.startingXI.filter(p => p.id !== this.draggingPlayer.id)
-      this.bench.push(this.draggingPlayer)
-      this.draggingPlayer = null
+      this.startingXILocal = this.startingXILocal.filter(
+        p => p.id !== this.draggingPlayer.id
+      );
+      this.bench.push(this.draggingPlayer);
+      this.draggingPlayer = null;
+    },
+    selectSquad() {
+      if (this.startingXILocal.length === 5) {
+        if (this.callbackStartSquad) {
+          // передаём в родителя актуальный стартовый состав
+          this.callbackStartSquad([...this.startingXILocal]);
+        }
+        alert('Состав на игру определён');
+      } else {
+        alert('В стартовом составе должно быть 5 игроков');
+      }
+    },
+    checkBench() {
+      if (this.startingXILocal.length === 0) return;
+      const idsInStarting = this.startingXILocal.map(p => p.id);
+      this.bench = this.bench.filter(
+        player => !idsInStarting.includes(player.id)
+      );
     }
   }
 }
@@ -92,7 +136,6 @@ export default {
 
 <template>
   <div class="squad-layout">
-    <!-- Таблица всех игроков команды (скамейка) -->
     <div class="bench">
       <h2>Состав команды</h2>
       <table class="players-table">
@@ -122,7 +165,6 @@ export default {
       </table>
     </div>
 
-    <!-- Поле с основным составом -->
     <div
       class="field"
       @dragover="allowDrop"
@@ -130,14 +172,14 @@ export default {
     >
       <h2>
         Основной состав (до 5)
-        <span v-if="startingXI.length">
+        <span v-if="startingXILocal.length">
           — ср. рейтинг: {{ averageFieldRate }}
         </span>
       </h2>
 
       <div class="field-players">
         <div
-          v-for="player in startingXI"
+          v-for="player in startingXILocal"
           :key="player.id"
           class="shirt"
           draggable="true"
@@ -159,7 +201,6 @@ export default {
       </div>
     </div>
 
-    <!-- Зона для возврата игрока на скамейку -->
     <div
       class="bench-dropzone"
       @dragover="allowDrop"
@@ -167,17 +208,32 @@ export default {
     >
       Перетащи сюда игрока, чтобы вернуть его на скамейку
     </div>
+
+    <button class="selectBtn" @click="selectSquad">
+      Выбрать состав на следующую игру
+    </button>
   </div>
 </template>
 
 <style scoped>
+.selectBtn {
+  width: 300px;
+  height: 50px;
+  background-color: #3c9952;
+  border-radius: 5px;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+}
+.selectBtn:hover {
+  background-color: #235a30;
+}
+
 .squad-layout {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
-/* таблица */
 
 .bench {
   background: #fff;
@@ -205,8 +261,6 @@ export default {
   font-weight: 600;
 }
 
-/* поле */
-
 .field {
   background: linear-gradient(#3c9952, #2e7b40);
   padding: 16px;
@@ -226,8 +280,6 @@ export default {
   margin-top: 12px;
 }
 
-/* футболка */
-
 .shirt {
   display: flex;
   flex-direction: column;
@@ -243,7 +295,6 @@ export default {
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
 }
 
-/* рукава */
 .shirt-body::before,
 .shirt-body::after {
   content: '';
@@ -251,7 +302,7 @@ export default {
   top: 8px;
   width: 20px;
   height: 24px;
-  background: inherit; /* тот же цвет, что у футболки */
+  background: inherit;
 }
 
 .shirt-body::before {
@@ -279,8 +330,6 @@ export default {
   text-align: center;
   max-width: 90px;
 }
-
-/* зона возврата */
 
 .bench-dropzone {
   margin-top: 10px;
