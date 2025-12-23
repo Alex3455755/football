@@ -27,7 +27,11 @@ export default {
     color: {
       type: String,
       default: ''
-    }
+    },
+    fetchTeams: {
+      type: Function,
+      default: null
+    },
   },
   data() {
     return {
@@ -49,7 +53,21 @@ export default {
           this.calendar = [];
           return;
         }
-        this.calendar = this.shuffle([...newVal]);
+        console.log(this.calendar.length);
+        if(this.calendar.length === 0){
+          this.calendar = this.shuffle([...newVal]);
+        }
+      }
+    },
+    tour: {
+      immediate: true,
+      deep: true,
+      handler(newVal) {
+        console.log(this.tour);
+            if (newVal >= this.calendar.length && this.calendar.length !=0) {
+          alert("Чемпионат окончен");
+          return;
+        }
       }
     }
   },
@@ -101,6 +119,7 @@ export default {
         <button @click="changeComponent($event)">Главная</button>
         <button @click="changeComponent($event)">Состав</button>
         <button @click="changeComponent($event)" id="nextGame">Следующий Матч</button>
+        <button @click="fetchTeams">Обновить</button>
       </nav>
     </aside>
     <article>
@@ -116,11 +135,6 @@ export default {
         :callbackClose="closeModal"
         :callbackTour="callBackTour"
       />
-      <ul>
-        <li v-for="team in calendar" :key="team.id">
-          {{ team.name }}
-        </li>
-      </ul>
     </article>
   </div>
 </template>

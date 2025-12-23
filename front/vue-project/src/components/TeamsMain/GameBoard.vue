@@ -62,7 +62,6 @@ export default {
       });
       sr /=5;
       sr -= this.OpponentTeam.common_rate;
-      console.log(parseInt(sr));
       if(Math.random() < 0.5){
         this.randomGoal(sr);
         this.randomGoal(sr);
@@ -91,10 +90,60 @@ export default {
 
 
     },
-    closeModal(){
-        for(let i = 0; i < this.teamsList.length; i += 2){
-            console.log(this.teamsList[i]);
+   async fetchPoints(idTeam, countPoints) {
+  this.loading = true;
+  this.error = null;
+  
+  try {
+    const response = await fetch('http://localhost/football/back/TeamsController.php/?method=setPoints', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        idTeam: idTeam,
+        countPoints: countPoints
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+  } catch (error) {
+    console.error('Error fetching points:', error);
+    this.error = error.message;
+  } finally {
+    this.loading = false;
+  }
+}
+,
+    async closeModal(){
+        const list = this.teamsList.filter(team => team.id !== this.MyTeam.id && team.id !== this.OpponentTeam.id);
+        for(let i = 0; i < list.length; i += 2){
+                if(Math.random() < 0.5){
+                  await this.fetchPoints(list[i].id,3)
+                }else if(Math.random() < 0.5){
+                  await this.fetchPoints(list[i+1].id,3)
+                }else{
+                      await Promise.all([
+                      this.fetchPoints(list[i].id, 1),
+                      this.fetchPoints(list[i+1].id, 1)
+                    ]);
+                }
         }
+        if(this.myScore > this.opScore){
+    await this.fetchPoints(this.MyTeam.id, 3);
+  } else if(this.opScore > this.myScore){
+    await this.fetchPoints(this.OpponentTeam.id, 3);
+  } else {
+    await Promise.all([
+      this.fetchPoints(this.MyTeam.id, 1),
+      this.fetchPoints(this.OpponentTeam.id, 1)
+    ]);
+  }
         this.callbackClose();
         this.callbackTour();
     },

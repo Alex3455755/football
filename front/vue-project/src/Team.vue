@@ -39,6 +39,9 @@ export default {
         this.loading = false;
       }
     },
+    handler(){
+      this.fetchTeam();
+    },
     async fetchPlayersByTeam(){
         this.loading = true;
       this.error = null;
@@ -73,7 +76,7 @@ export default {
         },
         teamsList: [],
          cssVars: {
-        '--team-color': '#CCCCCC' // значение по умолчанию
+        '--team-color': '#CCCCCC'
       }
     }
   },
@@ -87,7 +90,8 @@ export default {
     </header>
     <main>
     <MainTeamBlock :id = "id" :squad = "players"
-    :team = "team" :teamsList ="teamsList" :color="team.color"/>
+    :team = "team" :teamsList ="teamsList" :color="team.color"
+    :fetchTeams = "handler"/>
     </main>
 </template>
 

@@ -1,7 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, OPTIONS");
-header("Content-Type: application/json; charset=UTF-8");
+require_once __DIR__ . '/cors.php';
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -91,8 +89,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'message' => $e->getMessage()
         ]);
     }
-} else {
+}else if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+    if($_GET['method'] === 'setPoints'){
+            $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+    
+    if (!$data || !isset($data['idTeam']) || !isset($data['countPoints'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Missing required parameters: idTeam, countPoints']);
+        exit;
+    }
+    
+    $idTeam = (int)$data['idTeam'];
+    $countPoints = (int)$data['countPoints'];
+
+    $conn = new mysqli($host, $username, $password, $dbname);
+        
+                if ($conn->connect_error) {
+                    throw new Exception("Connection failed: " . $conn->connect_error);
+                }
+                
+                $sql = "UPDATE `teams` SET `count_points` = `count_points` + '$countPoints' WHERE `id` = $idTeam";
+                $result = $conn->query($sql);
+                
+                if ($result === false) {
+                    throw new Exception("Query failed: " . $conn->error);
+                }
+                $conn->close();
+                
+                echo json_encode([
+            'success' => true, 
+            'message' => 'Points updated successfully',
+            'idTeam' => $idTeam,
+            'countPoints' => $countPoints
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+}
+ else {
     http_response_code(405);
     echo json_encode(['error' => 'Method not allowed. Use GET.']);
-}
+ }
 ?>
